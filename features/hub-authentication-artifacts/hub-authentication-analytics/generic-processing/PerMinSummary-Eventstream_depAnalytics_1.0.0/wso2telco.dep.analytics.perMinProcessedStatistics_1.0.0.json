@@ -1,0 +1,139 @@
+{
+  "name": "wso2telco.dep.analytics.perMinProcessedStatistics",
+  "version": "1.0.0",
+  "nickName": "ProcessedStatistics",
+  "description": "Summarised Processed Statistics Per Minute",
+  "payloadData": [
+    {
+      "name": "api",
+      "type": "STRING"
+    },
+    // {
+    //   "name": "resourcePath",
+    //   "type": "STRING"
+    // },
+    // {
+    //   "name": "method",
+    //   "type": "STRING"
+    // },
+    {
+      "name": "responseTime",
+      "type": "LONG"
+    },
+    // {
+    //   "name": "serviceTime",
+    //   "type": "LONG"
+    // },
+    {
+      "name": "serviceProvider",
+      "type": "STRING"
+    },
+    {
+      "name": "apiPublisher",
+      "type": "STRING"
+    },
+    {
+      "name": "applicationName",
+      "type": "STRING"
+    },
+    // {
+    //   "name": "requestId",
+    //   "type": "STRING"
+    // },
+    {
+      "name": "operatorId",
+      "type": "STRING"
+    },
+    // {
+    //   "name": "responseCode",
+    //   "type": "STRING"
+    // },
+    {
+      "name": "isSuccess",
+      "type": "BOOL"
+    },
+    {
+      "name": "msisdn",
+      "type": "STRING"
+    },
+    {
+      "name": "direction",
+      "type": "STRING"
+    },
+
+    {
+      "name": "totalCount",
+      "type": "LONG"
+    },
+    // {
+    //   "name": "jsonBody",
+    //   "type": "STRING"
+    // },
+    {
+      "name": "serviceProviderId",
+      "type": "STRING"
+    },
+    // {
+    //   "name": "spUserId",
+    //   "type": "STRING"
+    // },
+    // {
+    //   "name": "spConsumerKey",
+    //   "type": "STRING"
+    // },
+    {
+      "name": "errorMessageId",
+      "type": "STRING"
+    },
+    // {
+    //   "name": "errorText",
+    //   "type": "STRING"
+    // },
+    {
+      "name": "responseTimeRange",
+      "type": "STRING"
+    },
+    {
+      "name": "year",
+      "type": "INT"
+    },
+    {
+      "name": "month",
+      "type": "INT"
+    },
+    {
+      "name": "day",
+      "type": "INT"
+    },
+    {
+      "name": "hour",
+      "type": "INT"
+    },
+
+    {
+      "name": "min",
+      "type": "INT"
+    },
+
+    {
+      "name": "operatorName",
+      "type": "STRING"
+    },
+    {
+      "name": "apiPublisherID",
+      "type": "STRING"
+    },
+    {
+      "name": "apiID",
+      "type": "STRING"
+    },
+    {
+      "name": "department",
+      "type": "STRING"
+    },
+    {
+      "name": "applicationId",
+      "type": "STRING"
+    }
+  ]
+}

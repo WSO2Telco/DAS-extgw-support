@@ -1,0 +1,41 @@
+/* Enter a unique ExecutionPlan */
+@Plan:name('ExecutionPlan-depAnalytics-perMinSummary')
+
+/* Enter a unique description for ExecutionPlan */
+-- @Plan:description('ExecutionPlan')
+
+/* define streams/tables and write queries here ... */
+
+
+@Import('org.wso2telco.analytics.hub.stream.processedStatistics:1.0.0')
+define stream processedevnts (api string, resourcePath string, method string, responseTime long, serviceTime long, serviceProvider string, apiPublisher string, applicationName string, requestId string, operatorId string, responseCode string, isSuccess bool, msisdn string, direction string, jsonBody string, serviceProviderId string, spUserId string, spConsumerKey string, errorMessageId string, errorText string, responseTimeRange string, year int, month int, day int, hour int, operatorName string, apiPublisherID string, apiID string, department string, applicationId string);
+
+@Export('wso2telco.dep.analytics.perMinProcessedStatistics:1.0.0')
+define stream minsummaryReal (api string, responseTime long , serviceProvider string, apiPublisher string, applicationName string, operatorId string, isSuccess bool, msisdn string, direction string, totalCount long, serviceProviderId string, errorMessageId string, responseTimeRange string, year int, month int, day int, hour int, min int, operatorName string, apiPublisherID string, apiID string, department string, applicationId string);
+
+
+from processedevnts#window.externalTimeBatch(responseTime, 1 sec, 0, 10 sec, true)
+select api, responseTime , serviceProvider , apiPublisher , applicationName , operatorId , isSuccess , msisdn , direction, serviceProviderId , errorMessageId, responseTimeRange , year , month , day ,
+hour, time:extract(responseTime, 'minute') as min, operatorName , apiPublisherID , apiID , "NOT_APPLICABLE" as department, applicationId, count() as totalCount group by isSuccess , serviceProviderId , errorMessageId, responseTimeRange , apiPublisherID , apiID , applicationId
+insert into processedevntsTemp;
+
+from processedevntsTemp
+select api, responseTime , serviceProvider , apiPublisher , applicationName , operatorId , isSuccess , msisdn , direction, serviceProviderId , errorMessageId, responseTimeRange , year , month , day ,
+hour, min , time:extract(responseTime, 'second') as second, convert((responseTime - (responseTime % 1000)), 'string') as responseTimeUnique, operatorName , apiPublisherID , apiID , "NOT_APPLICABLE" as department, applicationId, totalCount
+insert into processedevntsSecTemp;
+
+
+from processedevntsSecTemp
+select str:concat(responseTimeUnique, '_', isSuccess, '_', serviceProviderId, '_', errorMessageId,
+	'_', responseTimeRange, '_', apiPublisherID, '_', apiID, '_', "NOT_APPLICABLE", '_', applicationId) as uniqueId, api, responseTime , serviceProvider , apiPublisher , applicationName , operatorId , isSuccess , msisdn , direction, serviceProviderId , errorMessageId, responseTimeRange , year , month , day ,
+hour, min ,  second, operatorName , apiPublisherID , apiID , "NOT_APPLICABLE" as department, applicationId, totalCount
+insert into processedevntsSecTempWithUniqueId;
+
+from processedevntsSecTempWithUniqueId#window.uniqueExternalTimeBatch(uniqueId, responseTime, 60 sec, 59999 millisec, 10 sec, true)
+select uniqueId, api, max(responseTime) as  responseTime, serviceProvider , apiPublisher , applicationName , operatorId , isSuccess , msisdn , direction, serviceProviderId , errorMessageId, responseTimeRange , operatorName , apiPublisherID , apiID , "NOT_APPLICABLE" as department, applicationId, sum(totalCount) as totalCount group by isSuccess , serviceProviderId , errorMessageId, responseTimeRange , apiPublisherID , apiID , applicationId
+insert into processedevntsMinTempWithUniqueId;
+
+
+from processedevntsSecTempWithUniqueId
+select api,  responseTime , serviceProvider, apiPublisher, applicationName, operatorId , isSuccess , "NOT_APPLICABLE" as msisdn, direction , totalCount , serviceProviderId , errorMessageId ,responseTimeRange , time:extract(responseTime, 'year') as year,    time:extract(responseTime, 'month') as month,  time:extract(responseTime, 'day') as day ,  time:extract(responseTime, 'hour') as hour ,  time:extract(responseTime, 'minute') as min , operatorName, apiPublisherID , apiID , "NOT_APPLICABLE" as department, applicationId
+insert into minsummaryReal;

@@ -301,75 +301,71 @@
         );
 
 
-        INSERT OVERWRITE TABLE APIHourlyTrafficSummary SELECT year,month,day,hour,cast(getHourStartingTime(year, month, day,hour) as STRING) as eventTimeStamp,api,serviceProvider,apiPublisher,applicationName,operatorId,isSuccess,msisdn,direction,count(hour) as totalCount,
-        serviceProviderId, operatorName, apiPublisherID, apiID, department, applicationId FROM ORG_WSO2TELCO_ANALYTICS_HUB_STREAM_PROCESSEDSTATISTICS WHERE isSuccess =true GROUP BY year, month, day,hour,api,serviceProvider,apiPublisher,applicationName,operatorId,
-        isSuccess,msisdn,direction,serviceProviderId, operatorName, apiPublisherID, apiID, department, applicationId;
+        INSERT INTO TABLE APIHourlyTrafficSummary SELECT year,month,day,hour,cast(getHourStartingTime(year, month, day,hour) as STRING) as eventTimeStamp,first(api),first(serviceProvider), first(apiPublisher),first(applicationName),operatorId,isSuccess,first(msisdn),direction,count(hour) as totalCount,
+        serviceProviderId, first(operatorName), apiPublisherID, apiID, first(department), applicationId FROM ORG_WSO2TELCO_ANALYTICS_HUB_STREAM_PROCESSEDSTATISTICS WHERE isSuccess =true GROUP BY year, month, day,hour,operatorId, isSuccess,direction,serviceProviderId, apiPublisherID, apiID, applicationId;
 
         INCREMENTAL_TABLE_COMMIT APIHourlyTrafficSummary;
 
-        INSERT OVERWRITE TABLE APIDailyTrafficSummary SELECT year,month,day,cast(getDateStartingTime(year, month, day) as STRING) as eventTimeStamp,api,serviceProvider,apiPublisher,applicationName,operatorId,isSuccess,msisdn,direction,SUM(totalCount),
-        serviceProviderId, operatorName, apiPublisherID, apiID, department, applicationId FROM APIHourlyTrafficSummary GROUP BY year, month, day,api,serviceProvider,apiPublisher,applicationName,operatorId,isSuccess,msisdn,direction,
-        serviceProviderId, operatorName, apiPublisherID, apiID, department, applicationId;
+        INSERT INTO TABLE APIDailyTrafficSummary SELECT year,month,day,cast(getDateStartingTime(year, month, day) as STRING) as eventTimeStamp,first(api),first(serviceProvider),first(apiPublisher),first(applicationName),operatorId,isSuccess,first(msisdn),direction,SUM(totalCount),
+        serviceProviderId, first(operatorName), apiPublisherID, apiID, first(department), applicationId FROM APIHourlyTrafficSummary GROUP BY year, month, day,operatorId,isSuccess,direction,serviceProviderId, apiPublisherID, apiID, applicationId;
 
         INCREMENTAL_TABLE_COMMIT APIDailyTrafficSummary;
 
-        INSERT OVERWRITE TABLE APIMonthlyTrafficSummary SELECT year,month,cast(getMonthStartingTime(year, month) as STRING) as eventTimeStamp,api,serviceProvider,apiPublisher,applicationName,operatorId,isSuccess,msisdn,direction,SUM(totalCount),
-        serviceProviderId, operatorName, apiPublisherID, apiID, department, applicationId FROM APIDailyTrafficSummary GROUP BY year, month,api,serviceProvider,apiPublisher,applicationName,operatorId,isSuccess,msisdn,direction,
-        serviceProviderId, operatorName, apiPublisherID, apiID, department, applicationId;
+        INSERT INTO TABLE APIMonthlyTrafficSummary SELECT year,month,cast(getMonthStartingTime(year, month) as STRING) as eventTimeStamp,first(api),first(serviceProvider),first(apiPublisher),first(applicationName),operatorId,isSuccess,first(msisdn),direction,SUM(totalCount),
+        serviceProviderId, first(operatorName), apiPublisherID, apiID, first(department), applicationId FROM APIDailyTrafficSummary GROUP BY year, month,operatorId,isSuccess,direction,serviceProviderId,  apiPublisherID, apiID, applicationId;
 
         INCREMENTAL_TABLE_COMMIT APIMonthlyTrafficSummary;
 
-        INSERT OVERWRITE TABLE APIYearlyTrafficSummary SELECT year,cast(getMonthStartingTime(year, 1) as STRING) as eventTimeStamp,api,serviceProvider,apiPublisher,applicationName,operatorId,isSuccess,msisdn,direction,SUM(totalCount),
-        serviceProviderId, operatorName, apiPublisherID, apiID, department, applicationId FROM APIMonthlyTrafficSummary GROUP BY year,api,serviceProvider,apiPublisher,applicationName,operatorId,isSuccess,msisdn,direction,
-        serviceProviderId, operatorName, apiPublisherID, apiID, department, applicationId;
+        INSERT INTO TABLE APIYearlyTrafficSummary SELECT year,cast(getMonthStartingTime(year, 1) as STRING) as eventTimeStamp,first(api),first(serviceProvider),first(apiPublisher),first(applicationName),operatorId,isSuccess,first(msisdn),direction,SUM(totalCount),
+        serviceProviderId, first(operatorName), apiPublisherID, apiID, first(department), applicationId FROM APIMonthlyTrafficSummary GROUP BY year,operatorId,isSuccess,direction,serviceProviderId, apiPublisherID, apiID, applicationId;
 
         INCREMENTAL_TABLE_COMMIT APIYearlyTrafficSummary;
 
-        INSERT OVERWRITE TABLE APIHourlyFailureSummary SELECT year,month,day,hour,cast(getHourStartingTime(year, month, day,hour) as STRING) as eventTimeStamp,api,serviceProvider,apiPublisher,applicationName,operatorId,isSuccess,msisdn,direction,errorMessageId,count(errorMessageId) as totalFailureCount,
-        serviceProviderId, operatorName, apiPublisherID, apiID, department, applicationId FROM ORG_WSO2TELCO_ANALYTICS_HUB_STREAM_PROCESSEDSTATISTICS WHERE isSuccess =false GROUP BY year, month, day,hour,api,serviceProvider,apiPublisher,applicationName,operatorId,isSuccess,msisdn,direction,errorMessageId,
-        serviceProviderId, operatorName, apiPublisherID, apiID, department, applicationId;
+        INSERT INTO TABLE APIHourlyFailureSummary SELECT year,month,day,hour,cast(getHourStartingTime(year, month, day,hour) as STRING) as eventTimeStamp,first(api),first(serviceProvider),first(apiPublisher),first(applicationName),operatorId,isSuccess,first(msisdn),direction,errorMessageId,count(errorMessageId) as totalFailureCount,
+        serviceProviderId, first(operatorName), apiPublisherID, apiID, first(department), applicationId FROM ORG_WSO2TELCO_ANALYTICS_HUB_STREAM_PROCESSEDSTATISTICS WHERE isSuccess =false GROUP BY year, month, day,hour,operatorId,isSuccess,direction,errorMessageId,
+        serviceProviderId, apiPublisherID, apiID,  applicationId;
 
         INCREMENTAL_TABLE_COMMIT APIHourlyFailureSummary;
 
-        INSERT OVERWRITE TABLE APIDailyFailureSummary SELECT year,month,day,cast(getDateStartingTime(year, month, day) as STRING) as eventTimeStamp,api,serviceProvider,apiPublisher,applicationName,operatorId,isSuccess,msisdn,direction,errorMessageId,SUM(totalFailureCount),
-        serviceProviderId, operatorName, apiPublisherID, apiID, department, applicationId FROM APIHourlyFailureSummary GROUP BY year, month, day,api,serviceProvider,apiPublisher,applicationName,operatorId,isSuccess,msisdn,direction,errorMessageId,
-        serviceProviderId, operatorName, apiPublisherID, apiID, department, applicationId;
+        INSERT INTO TABLE APIDailyFailureSummary SELECT year,month,day,cast(getDateStartingTime(year, month, day) as STRING) as eventTimeStamp,first(api),first(serviceProvider),first(apiPublisher),first(applicationName),operatorId,isSuccess,first(msisdn),direction,errorMessageId,SUM(totalFailureCount),
+        serviceProviderId, first(operatorName), apiPublisherID, apiID, first(department), applicationId FROM APIHourlyFailureSummary GROUP BY year, month, day,operatorId,isSuccess,direction,errorMessageId,
+        serviceProviderId,  apiPublisherID, apiID,  applicationId;
 
         INCREMENTAL_TABLE_COMMIT APIDailyFailureSummary;
 
-        INSERT OVERWRITE TABLE APIMonthlyFailureSummary SELECT year,month,cast(getMonthStartingTime(year, month) as STRING) as eventTimeStamp,api,serviceProvider,apiPublisher,applicationName,operatorId,isSuccess,msisdn,direction,errorMessageId,SUM(totalFailureCount),
-        serviceProviderId, operatorName, apiPublisherID, apiID, department, applicationId FROM APIDailyFailureSummary GROUP BY year, month,api,serviceProvider,apiPublisher,applicationName,operatorId,isSuccess,msisdn,direction,errorMessageId,
-        serviceProviderId, operatorName, apiPublisherID, apiID, department, applicationId;
+        INSERT INTO TABLE APIMonthlyFailureSummary SELECT year,month,cast(getMonthStartingTime(year, month) as STRING) as eventTimeStamp,first(api),first(serviceProvider),first(apiPublisher),first(applicationName),operatorId,isSuccess,first(msisdn),direction,errorMessageId,SUM(totalFailureCount),
+        serviceProviderId, first(operatorName), apiPublisherID, apiID, first(department), applicationId FROM APIDailyFailureSummary GROUP BY year, month,operatorId,isSuccess,direction,errorMessageId,
+        serviceProviderId,  apiPublisherID, apiID,  applicationId;
 
         INCREMENTAL_TABLE_COMMIT APIMonthlyFailureSummary;
 
-        INSERT OVERWRITE TABLE APIYearlyFailureSummary SELECT year,cast(getMonthStartingTime(year, 1) as STRING) as eventTimeStamp,api,serviceProvider,apiPublisher,applicationName,operatorId,isSuccess,msisdn,direction,errorMessageId,SUM(totalFailureCount),
-        serviceProviderId, operatorName, apiPublisherID, apiID, department, applicationId FROM APIMonthlyFailureSummary GROUP BY year,api,serviceProvider,apiPublisher,applicationName,operatorId,isSuccess,msisdn,direction,errorMessageId,
-        serviceProviderId, operatorName, apiPublisherID, apiID, department, applicationId;
+        INSERT INTO TABLE APIYearlyFailureSummary SELECT year,cast(getMonthStartingTime(year, 1) as STRING) as eventTimeStamp,first(api),first(serviceProvider),first(apiPublisher),first(applicationName),operatorId,isSuccess,first(msisdn),direction,errorMessageId,SUM(totalFailureCount),
+        serviceProviderId, first(operatorName), apiPublisherID, apiID, first(department), applicationId FROM APIMonthlyFailureSummary GROUP BY year,operatorId,isSuccess,direction,errorMessageId,
+        serviceProviderId,  apiPublisherID, apiID,  applicationId;
 
         INCREMENTAL_TABLE_COMMIT APIYearlyFailureSummary;
 
-        INSERT OVERWRITE TABLE APIHourlyResponseTimeSummary SELECT year,month,day,hour,cast(getHourStartingTime(year, month, day,hour) as STRING) as eventTimeStamp,api,serviceProvider,apiPublisher,applicationName,operatorId,isSuccess,msisdn,direction,responseTimeRange,count(responseTimeRange) as totalResponseCount,
-        serviceProviderId, operatorName, apiPublisherID, apiID, department, applicationId FROM ORG_WSO2TELCO_ANALYTICS_HUB_STREAM_PROCESSEDSTATISTICS WHERE isSuccess = true GROUP BY year, month, day,hour,api,serviceProvider,apiPublisher,applicationName,operatorId,isSuccess,msisdn,direction,responseTimeRange,
-        serviceProviderId, operatorName, apiPublisherID, apiID, department, applicationId;
+        INSERT INTO TABLE APIHourlyResponseTimeSummary SELECT year,month,day,hour,cast(getHourStartingTime(year, month, day,hour) as STRING) as eventTimeStamp,first(api),first(serviceProvider),first(apiPublisher),first(applicationName),operatorId,isSuccess,first(msisdn),direction,responseTimeRange,count(responseTimeRange) as totalResponseCount,
+        serviceProviderId, first(operatorName), apiPublisherID, apiID, first(department), applicationId FROM ORG_WSO2TELCO_ANALYTICS_HUB_STREAM_PROCESSEDSTATISTICS WHERE isSuccess = true GROUP BY year, month, day,hour,operatorId,isSuccess,direction,responseTimeRange,
+        serviceProviderId,  apiPublisherID, apiID,  applicationId;
 
         INCREMENTAL_TABLE_COMMIT APIHourlyResponseTimeSummary;
 
-        INSERT OVERWRITE TABLE APIDailyResponseTimeSummary SELECT year,month,day,cast(getDateStartingTime(year, month, day) as STRING) as eventTimeStamp,api,serviceProvider,apiPublisher,applicationName,operatorId,isSuccess,msisdn,direction,responseTimeRange, SUM(totalResponseCount),
-        serviceProviderId, operatorName, apiPublisherID, apiID, department, applicationId FROM APIHourlyResponseTimeSummary GROUP BY year, month, day,api,serviceProvider,apiPublisher,applicationName,operatorId,isSuccess,msisdn,direction,responseTimeRange,
-        serviceProviderId, operatorName, apiPublisherID, apiID, department, applicationId;
+        INSERT INTO TABLE APIDailyResponseTimeSummary SELECT year,month,day,cast(getDateStartingTime(year, month, day) as STRING) as eventTimeStamp,first(api),first(serviceProvider),first(apiPublisher),first(applicationName),operatorId,isSuccess,first(msisdn),direction,responseTimeRange, SUM(totalResponseCount),
+        serviceProviderId, first(operatorName), apiPublisherID, apiID, first(department), applicationId FROM APIHourlyResponseTimeSummary GROUP BY year, month, day,operatorId,isSuccess,direction,responseTimeRange,
+        serviceProviderId,  apiPublisherID, apiID,  applicationId;
 
         INCREMENTAL_TABLE_COMMIT APIDailyResponseTimeSummary;
 
-        INSERT OVERWRITE TABLE APIMonthlyResponseTimeSummary SELECT year,month,cast(getMonthStartingTime(year, month) as STRING) as eventTimeStamp,api,serviceProvider,apiPublisher,applicationName,operatorId,isSuccess,msisdn,direction,responseTimeRange, SUM(totalResponseCount),
-        serviceProviderId, operatorName, apiPublisherID, apiID, department, applicationId FROM APIDailyResponseTimeSummary GROUP BY year, month,api,serviceProvider,apiPublisher,applicationName,operatorId,isSuccess,msisdn,direction,responseTimeRange,
-        serviceProviderId, operatorName, apiPublisherID, apiID, department, applicationId;
+        INSERT INTO TABLE APIMonthlyResponseTimeSummary SELECT year,month,cast(getMonthStartingTime(year, month) as STRING) as eventTimeStamp,first(api),first(serviceProvider),first(apiPublisher),first(applicationName),operatorId,isSuccess,first(msisdn),direction,responseTimeRange, SUM(totalResponseCount),
+        serviceProviderId, first(operatorName), apiPublisherID, apiID, first(department), applicationId FROM APIDailyResponseTimeSummary GROUP BY year, month,operatorId,isSuccess,direction,responseTimeRange,
+        serviceProviderId,  apiPublisherID, apiID,  applicationId;
 
         INCREMENTAL_TABLE_COMMIT APIMonthlyResponseTimeSummary;
 
-        INSERT OVERWRITE TABLE APIYearlyResponseTimeSummary SELECT year,cast(getMonthStartingTime(year, 1) as STRING) as eventTimeStamp,api,serviceProvider,apiPublisher,applicationName,operatorId,isSuccess,msisdn,direction,responseTimeRange, SUM(totalResponseCount),
-        serviceProviderId, operatorName, apiPublisherID, apiID, department, applicationId FROM APIMonthlyResponseTimeSummary GROUP BY year,api,serviceProvider,apiPublisher,applicationName,operatorId,isSuccess,msisdn,direction,responseTimeRange,
-        serviceProviderId, operatorName, apiPublisherID, apiID, department, applicationId;
+        INSERT INTO TABLE APIYearlyResponseTimeSummary SELECT year,cast(getMonthStartingTime(year, 1) as STRING) as eventTimeStamp,first(api),first(serviceProvider),first(apiPublisher),first(applicationName),operatorId,isSuccess,first(msisdn),direction,responseTimeRange, SUM(totalResponseCount),
+        serviceProviderId, first(operatorName), apiPublisherID, apiID, first(department), applicationId FROM APIMonthlyResponseTimeSummary GROUP BY year,operatorId,isSuccess,direction,responseTimeRange,
+        serviceProviderId,  apiPublisherID, apiID,  applicationId;
 
         INCREMENTAL_TABLE_COMMIT APIYearlyResponseTimeSummary;
     </Script>

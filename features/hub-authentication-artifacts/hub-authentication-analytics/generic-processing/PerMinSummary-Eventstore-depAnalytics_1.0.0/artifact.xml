@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<artifact name="PerMinSummary-Eventstore-depAnalytics" version="1.0.0" type="analytics/eventstore" serverRole="DataAnalyticsServer">
+    <file>wso2telco_dep_analytics_perMinProcessedStatistics.xml</file>
+</artifact> 
