@@ -27,7 +27,7 @@ apiID string, department string, applicationId string);
 * confirms the operatorID value is a single value and not a role list
 */
 @info(name = 'query1')
-from getResponse [((operatorId is null) == false) and (not(str:contains(operatorId,"[")))]#log('test messageOne')
+from getResponse [((operatorId is null) == false) and (not(str:contains(operatorId,"[")))]
 select api,resourcePath,method,responseTime,serviceTime,serviceProvider,apiPublisher,applicationName,requestId,operatorId,responseCode,msisdn,direction,jsonBody,serviceProviderId,spUserId,spConsumerKey,
 time:extract(responseTime,'year') as year,time:extract(responseTime,'month') as month,time:extract(responseTime,'day') as day,time:extract(responseTime,'hour') as hour,
 operatorName, apiPublisherID, apiID, department, applicationId
@@ -38,7 +38,7 @@ insert into tempPreProcessedResponse;
 * confirms the operatorID value is a role list and contains the hub-publisher role
 */
 @info(name = 'query2')
-from getResponse [ ((operatorId is null) == false) and (str:contains(operatorId,"hub-") and str:contains(operatorId,"-publisher"))]#log('test messageTwo')
+from getResponse [ ((operatorId is null) == false) and (str:contains(operatorId,"hub-") and str:contains(operatorId,"-publisher"))]
 select api,resourcePath,method,responseTime,serviceTime,serviceProvider,apiPublisher,applicationName,requestId,str:substr(operatorId, '(?<=hub-)(.*)(?=-publisher)') as operatorId,responseCode,msisdn,direction,jsonBody,serviceProviderId,spUserId,spConsumerKey,
 time:extract(responseTime,'year') as year,time:extract(responseTime,'month') as month,time:extract(responseTime,'day') as day,time:extract(responseTime,'hour') as hour,
 operatorName, apiPublisherID, apiID, department, applicationId
@@ -49,7 +49,7 @@ insert into tempPreProcessedResponse;
 * confirms the operatorID value is a role list and not a single value and also not a hub-publisher role
 */
 @info(name = 'query3')
-from getResponse [((operatorId is null) == true) or ((str:contains(operatorId,"[")) and (not(str:contains(operatorId,"-publisher"))))]#log('test messageThree')
+from getResponse [((operatorId is null) == true) or ((str:contains(operatorId,"[")) and (not(str:contains(operatorId,"-publisher"))))]
 select api,resourcePath,method,responseTime,serviceTime,serviceProvider,apiPublisher,applicationName,requestId,'None' as operatorId ,responseCode,msisdn,direction,jsonBody,serviceProviderId,spUserId,spConsumerKey,
 time:extract(responseTime,'year') as year,time:extract(responseTime,'month') as month,time:extract(responseTime,'day') as day,time:extract(responseTime,'hour') as hour,
 operatorName, apiPublisherID, apiID, department, applicationId
@@ -60,7 +60,7 @@ insert into tempPreProcessedResponse;
 * Identifying the success response
 */
 @info(name = 'query4')
-from tempPreProcessedResponse [convert(responseCode,'int') >= 200 and convert(responseCode,'int') < 300]#log('test messageFour')
+from tempPreProcessedResponse [convert(responseCode,'int') >= 200 and convert(responseCode,'int') < 300]
 select api,resourcePath,method,responseTime,serviceTime,serviceProvider,apiPublisher,applicationName,requestId,operatorId,responseCode,true as isSuccess,msisdn,direction,jsonBody,serviceProviderId,spUserId,spConsumerKey,
 year,month,day,hour,operatorName, apiPublisherID, apiID, department, applicationId
 insert into tempProcessedResponse;
@@ -69,7 +69,7 @@ insert into tempProcessedResponse;
 * Identifying the failure response
 */
 @info(name = 'query5')
-from tempPreProcessedResponse [convert(responseCode,'int') >= 300 and convert(responseCode,'int') < 600]#log('test messageFive')
+from tempPreProcessedResponse [convert(responseCode,'int') >= 300 and convert(responseCode,'int') < 600]
 select api,resourcePath,method,responseTime,serviceTime,serviceProvider,apiPublisher,applicationName,requestId,operatorId,responseCode,false as isSuccess,msisdn,direction,jsonBody,serviceProviderId,spUserId,spConsumerKey,
 year,month,day,hour,operatorName, apiPublisherID, apiID, department, applicationId
 insert into tempProcessedResponse;
@@ -79,7 +79,7 @@ insert into tempProcessedResponse;
 * Creates a temporary stream for the failure response, including relevant fields
 */
 @info(name = 'query6')
-from tempProcessedResponse [ isSuccess == false]#log('test messageSix')
+from tempProcessedResponse [ isSuccess == false]
 select api,resourcePath,method,responseTime,serviceTime,serviceProvider,apiPublisher,applicationName,requestId,operatorId,responseCode,isSuccess,msisdn,direction,jsonBody,serviceProviderId,spUserId,spConsumerKey, '' as errorMessageId, '' as errorText, '' as responseTimeRange,year, month,day,hour,
 operatorName, apiPublisherID, apiID, department, applicationId
 insert into tempFailurePreProcessedResponse;
@@ -90,7 +90,7 @@ insert into tempFailurePreProcessedResponse;
 * Add an empty string for the responseTimeRange
 */
 @info(name = 'query7')
-from tempFailurePreProcessedResponse [(wso2TelcoHubAnalytics:getJSONBody(jsonBody,'requestError.serviceException') is null) == false]#log('test messageSeven')
+from tempFailurePreProcessedResponse [(wso2TelcoHubAnalytics:getJSONBody(jsonBody,'requestError.serviceException') is null) == false]
 select api,resourcePath,method,responseTime,serviceTime,serviceProvider,apiPublisher,applicationName,requestId,operatorId,responseCode,isSuccess,msisdn,direction,jsonBody,serviceProviderId,spUserId,spConsumerKey,
 cast(wso2TelcoHubAnalytics:getJSONBody(jsonBody,'requestError.serviceException.messageId'),'string') as errorMessageId,
 cast(wso2TelcoHubAnalytics:getJSONBody(jsonBody,'requestError.serviceException.text'),'string') as errorText, '' as responseTimeRange,
@@ -102,7 +102,7 @@ insert into tempFailureProcessedResponse;
 * Add an empty string for the responseTimeRange
 */
 @info(name = 'query8')
-from tempFailurePreProcessedResponse [(wso2TelcoHubAnalytics:getJSONBody(jsonBody,'requestError.policyException') is null) == false]#log('test messageEight')
+from tempFailurePreProcessedResponse [(wso2TelcoHubAnalytics:getJSONBody(jsonBody,'requestError.policyException') is null) == false]
 select api,resourcePath,method,responseTime,serviceTime,serviceProvider,apiPublisher,applicationName,requestId,operatorId,responseCode,isSuccess,msisdn, direction,jsonBody,serviceProviderId,spUserId,spConsumerKey,
 cast(wso2TelcoHubAnalytics:getJSONBody(jsonBody,'requestError.policyException.messageId'),'string') as errorMessageId,
 cast(wso2TelcoHubAnalytics:getJSONBody(jsonBody,'requestError.policyException.text'),'string') as errorText,'' as responseTimeRange,
@@ -114,7 +114,7 @@ insert into tempFailureProcessedResponse;
 */
 
 @info(name ='query9')
-from tempProcessedResponse[isSuccess == true]#log('test messageNine')
+from tempProcessedResponse[isSuccess == true]
 select api,resourcePath,method,responseTime,serviceTime,serviceProvider,apiPublisher,applicationName,requestId,operatorId,responseCode,isSuccess,msisdn, direction,jsonBody,serviceProviderId,spUserId,spConsumerKey,
 '' as errorMessageId, '' as errorText, '' as responseTimeRange,year,month,day,hour,
 operatorName, apiPublisherID, apiID, department, applicationId
@@ -125,7 +125,7 @@ insert into tempSuccessPreProcessedResponse;
 */
 
 @info(name ='query10')
-from tempSuccessPreProcessedResponse[(convert(serviceTime,'int') >= 0) and (convert(serviceTime,'int') <= 10)]#log('test messageTen')
+from tempSuccessPreProcessedResponse[(convert(serviceTime,'int') >= 0) and (convert(serviceTime,'int') <= 10)]
 select api,resourcePath,method,responseTime,serviceTime,serviceProvider,apiPublisher,applicationName,requestId,operatorId,responseCode,isSuccess,msisdn, direction,jsonBody,serviceProviderId,spUserId,spConsumerKey,
 '' as errorMessageId, '' as errorText, '0000-0010' as responseTimeRange,year,month,day,hour,
 operatorName, apiPublisherID, apiID, department, applicationId
@@ -135,7 +135,7 @@ insert into processedResponse;
 * Handles Service time for success, if the service Time is between 11-100
 */
 @info(name ='query11')
-from tempSuccessPreProcessedResponse[(convert(serviceTime,'int') > 10) and (convert(serviceTime,'int') <= 100)]#log('test messageElevan')
+from tempSuccessPreProcessedResponse[(convert(serviceTime,'int') > 10) and (convert(serviceTime,'int') <= 100)]
 select api,resourcePath,method,responseTime,serviceTime,serviceProvider,apiPublisher,applicationName,requestId,operatorId,responseCode,isSuccess,msisdn,direction,jsonBody,serviceProviderId,spUserId,spConsumerKey, '' as errorMessageId, '' as errorText, '0011-0100' as responseTimeRange,year,month,day,hour,
 operatorName, apiPublisherID, apiID, department, applicationId
 insert into processedResponse;
@@ -144,7 +144,7 @@ insert into processedResponse;
 * Handles Service time for success, if the service Time is between 101-1000
 */
 @info(name ='query12')
-from tempSuccessPreProcessedResponse[(convert(serviceTime,'int') > 100) and (convert(serviceTime,'int') <= 1000)]#log('test messageTwele')
+from tempSuccessPreProcessedResponse[(convert(serviceTime,'int') > 100) and (convert(serviceTime,'int') <= 1000)]
 select api,resourcePath,method,responseTime,serviceTime,serviceProvider,apiPublisher,applicationName,requestId,operatorId,responseCode,isSuccess,msisdn,direction, jsonBody,serviceProviderId,spUserId,spConsumerKey,'' as errorMessageId, '' as errorText,'0101-1000' as responseTimeRange,year,month,day,hour,
 operatorName, apiPublisherID, apiID, department, applicationId
 insert into processedResponse;
@@ -153,7 +153,7 @@ insert into processedResponse;
 * Handles Service time for success, if the service Time is greater than 1000
 */
 @info(name ='query13')
-from tempSuccessPreProcessedResponse[(convert(serviceTime,'int') > 1000)]#log('test messageThirteen')
+from tempSuccessPreProcessedResponse[(convert(serviceTime,'int') > 1000)]
 select api,resourcePath,method,responseTime,serviceTime,serviceProvider,apiPublisher,applicationName,requestId,operatorId,responseCode,isSuccess,msisdn,direction,jsonBody,serviceProviderId,spUserId,spConsumerKey, '' as errorMessageId, '' as errorText, '>1000' as responseTimeRange,year,month,day,hour,
 operatorName, apiPublisherID, apiID, department, applicationId
 insert into processedResponse;
@@ -163,7 +163,7 @@ insert into processedResponse;
 */
 
 @info(name ='query14')
-from tempFailureProcessedResponse[(convert(serviceTime,'int') >= 0) and (convert(serviceTime,'int') <= 10)]#log('test messageFourteen')
+from tempFailureProcessedResponse[(convert(serviceTime,'int') >= 0) and (convert(serviceTime,'int') <= 10)]
 select api,resourcePath,method,responseTime,serviceTime,serviceProvider,apiPublisher,applicationName,requestId,operatorId,responseCode,isSuccess,msisdn, direction,jsonBody,serviceProviderId,spUserId,spConsumerKey,errorMessageId, errorText, '0000-0010' as responseTimeRange,year,month,day,hour,
 operatorName, apiPublisherID, apiID, department, applicationId
 insert into processedResponse;
@@ -172,7 +172,7 @@ insert into processedResponse;
 * Handles Service time for failure, if the service Time is between 11-100
 */
 @info(name ='query15')
-from tempFailureProcessedResponse[(convert(serviceTime,'int') > 10) and (convert(serviceTime,'int') <= 100)]#log('test messageFifteen')
+from tempFailureProcessedResponse[(convert(serviceTime,'int') > 10) and (convert(serviceTime,'int') <= 100)]
 select api,resourcePath,method,responseTime,serviceTime,serviceProvider,apiPublisher,applicationName,requestId,operatorId,responseCode,isSuccess,msisdn,direction,jsonBody,serviceProviderId,spUserId,spConsumerKey,errorMessageId, errorText, '0011-0100' as responseTimeRange,year,month,day,hour,
 operatorName, apiPublisherID, apiID, department, applicationId
 insert into processedResponse;
@@ -181,7 +181,7 @@ insert into processedResponse;
 * Handles Service time for failure, if the service Time is between 101-1000
 */
 @info(name ='query16')
-from tempFailureProcessedResponse[(convert(serviceTime,'int') > 100) and (convert(serviceTime,'int') <= 1000)]#log('test messageSixteen')
+from tempFailureProcessedResponse[(convert(serviceTime,'int') > 100) and (convert(serviceTime,'int') <= 1000)]
 select api,resourcePath,method,responseTime,serviceTime,serviceProvider,apiPublisher,applicationName,requestId,operatorId,responseCode,isSuccess,msisdn,direction, jsonBody,serviceProviderId,spUserId,spConsumerKey,errorMessageId, errorText,'0101-1000' as responseTimeRange,year,month,day,hour,
 operatorName, apiPublisherID, apiID, department, applicationId
 insert into processedResponse;
@@ -190,7 +190,7 @@ insert into processedResponse;
 * Handles Service time for failure, if the service Time is greater than 1000
 */
 @info(name ='query17')
-from tempFailureProcessedResponse[(convert(serviceTime,'int') > 1000)]#log('test messageSeventeen')
+from tempFailureProcessedResponse[(convert(serviceTime,'int') > 1000)]
 select api,resourcePath,method,responseTime,serviceTime,serviceProvider,apiPublisher,applicationName,requestId,operatorId,responseCode,isSuccess,msisdn,direction,jsonBody, serviceProviderId,spUserId,spConsumerKey,errorMessageId,errorText, '>1000' as responseTimeRange,year,month,day,hour,
 operatorName, apiPublisherID, apiID, department, applicationId
 insert into processedResponse;

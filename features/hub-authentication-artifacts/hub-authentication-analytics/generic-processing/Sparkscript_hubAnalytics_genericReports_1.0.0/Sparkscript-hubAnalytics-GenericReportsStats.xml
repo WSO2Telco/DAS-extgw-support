@@ -300,6 +300,35 @@
         primaryKeys "year,eventTimeStamp,api,serviceProvider,apiPublisher,applicationName,operatorId,isSuccess,msisdn,direction,,responseTimeRange"
         );
 
+        CREATE TEMPORARY TABLE APISummary using CarbonAnalytics options (tableName "org_wso2telco_analytics_hub_stream_api_summary",
+        schema "
+        api STRING -i,
+        serviceProvider STRING -i,
+        applicationName STRING -i,
+        operatorId STRING -i,
+        apiPublisher STRING -i,
+        serviceProviderId STRING -i,
+        operatorName STRING -i,
+        apiPublisherID STRING -i,
+        apiID STRING -i,
+        department STRING -i,
+        applicationId STRING -i",
+        primaryKeys "api,serviceProvider,applicationName,operatorId"
+        );
+
+        CREATE TEMPORARY TABLE SPSummary using CarbonAnalytics options (tableName "org_wso2telco_analytics_hub_stream_service_provider_summary",
+        schema "
+        serviceProvider STRING -i,
+        serviceProviderId STRING -i",
+        primaryKeys "serviceProvider"
+        );
+
+        CREATE TEMPORARY TABLE OperatorSummary using CarbonAnalytics options (tableName "org_wso2telco_analytics_hub_stream_operator_summary",
+        schema "
+        operatorId STRING -i,
+        operatorName STRING -i",
+        primaryKeys "operatorId"
+        );
 
         INSERT INTO TABLE APIHourlyTrafficSummary SELECT year,month,day,hour,cast(getHourStartingTime(year, month, day,hour) as STRING) as eventTimeStamp,first(api),first(serviceProvider), first(apiPublisher),first(applicationName),operatorId,isSuccess,first(msisdn),direction,count(hour) as totalCount,
         serviceProviderId, first(operatorName), apiPublisherID, apiID, first(department), applicationId FROM ORG_WSO2TELCO_ANALYTICS_HUB_STREAM_PROCESSEDSTATISTICS WHERE isSuccess =true GROUP BY year, month, day,hour,operatorId, isSuccess,direction,serviceProviderId, apiPublisherID, apiID, applicationId;
@@ -368,6 +397,17 @@
         serviceProviderId,  apiPublisherID, apiID,  applicationId;
 
         INCREMENTAL_TABLE_COMMIT APIYearlyResponseTimeSummary;
+
+        INSERT INTO TABLE SPSummary SELECT first(serviceProvider), serviceProviderId FROM APIYearlyTrafficSummary
+        GROUP BY serviceProviderId;
+
+        INSERT INTO TABLE APISummary SELECT first(api),first(serviceProvider),first(applicationName),operatorId,
+        first(apiPublisher), serviceProviderId, first(operatorName), apiPublisherID, apiID, first(department), applicationId
+        FROM APIYearlyTrafficSummary GROUP BY operatorId, serviceProviderId, apiPublisherID, apiID, applicationId;
+
+        INSERT INTO TABLE OperatorSummary SELECT operatorId, first(operatorName) FROM APIYearlyTrafficSummary
+        GROUP BY operatorId;
+
     </Script>
     <CronExpression>0 0/15 * * * ?</CronExpression>
 </Analytics>

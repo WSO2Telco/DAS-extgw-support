@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<artifact name="Sparkscript_hubAnalytics_commonReports_DEPRECATED" version="1.0.0" type="analytics/spark" serverRole="DataAnalyticsServer">
+    <file>Sparkscript-hubAnalytics-CommonStats-DEPRECATED.xml</file>
+</artifact>
