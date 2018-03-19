@@ -27,6 +27,7 @@ $(function () {
 
     var REFRESH_INTERVAL = 'refreshInterval';
     var operatorId = 0, serviceProviderId = 0, apiId = 0, applicationId = 0;
+    var apiName = 'All'; 
 
     var init = function () {
         $.ajax({
@@ -90,6 +91,7 @@ $(function () {
             conf.serviceProvider = serviceProviderId;
             conf.api = apiId;
             conf.applicationName = applicationId;
+            conf.apiName = apiName;
 
             conf.dateStart = moment(moment($("#reportrange").text().split("-")[0]).format("MMMM D, YYYY hh:mm A")).valueOf();
             conf.dateEnd = moment(moment($("#reportrange").text().split("-")[1]).format("MMMM D, YYYY hh:mm A")).valueOf();
@@ -306,6 +308,7 @@ $(function () {
       conf["provider-conf"]["provider-name"] = "app";
       conf.applicationId = "("+apps+")";
       apiId = 0;
+      apiName = 'All';
       $.ajax({
           url: gadgetLocation + '/gadget-controller.jag?action=getData',
           method: "POST",
@@ -337,6 +340,7 @@ $(function () {
                   $("#button-api").append('&nbsp;<span class="caret"></span>');
                   $("#button-api").val($(this).text());
                   apiId = $(this).data('val');
+                  apiName = $(this).text();
               });
           }
       });
