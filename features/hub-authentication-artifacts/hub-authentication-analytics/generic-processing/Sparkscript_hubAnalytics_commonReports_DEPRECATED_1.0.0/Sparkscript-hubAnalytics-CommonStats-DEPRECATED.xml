@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <Analytics>
-    <Name>Sparkscript-hubAnalytics-CommonStats</Name>
+    <Name>Sparkscript-hubAnalytics-CommonStats-DEPRECATED</Name>
     <Script>
 CREATE TEMPORARY TABLE ORG_WSO2TELCO_ANALYTICS_HUB_STREAM_PROCESSEDSTATISTICS
       USING CarbonAnalytics
@@ -54,7 +54,7 @@ INSERT INTO TABLE APISummary SELECT api,serviceProvider,applicationName,operator
 INCREMENTAL_TABLE_COMMIT APISummary;
 
 </Script>
-    <CronExpression>0 0/5 * * * ?</CronExpression>
+    <CronExpression></CronExpression>
 </Analytics>
                       
                             
