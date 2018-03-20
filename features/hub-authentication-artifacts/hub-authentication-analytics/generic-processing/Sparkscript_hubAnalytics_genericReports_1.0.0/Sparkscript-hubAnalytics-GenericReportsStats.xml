@@ -404,7 +404,7 @@
         apiPublisher, serviceProviderId, operatorName, apiPublisherID, apiID,  applicationId;
 
     </Script>
-    <CronExpression>0 0 0/2 1/1 * ? *</CronExpression>
+    <CronExpression>0 0/15 * 1/1 * ? *</CronExpression>
 </Analytics>
   
       
