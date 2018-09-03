@@ -88,11 +88,16 @@ public class CSVWriter {
         if (records.size() > 0) {
             for (Record record : records) {
                 String key = record.getValues().get("api").toString();
-                if (apiCount.containsKey(key)) {
+                if (apiCount.containsKey(key) && record.getValues().containsKey("totalFailureCount")) {
+                    count = apiCount.get(key) + Integer.parseInt(record.getValue("totalFailureCount").toString());
+                } else if (!apiCount.containsKey(key) && record.getValues().containsKey("totalFailureCount")) {
+                    count = Integer.parseInt(record.getValues().get("totalFailureCount").toString());
+                } else if (apiCount.containsKey(key)) {
                     count = apiCount.get(key) + Integer.parseInt(record.getValues().get("totalCount").toString());
                 } else {
                     count = Integer.parseInt(record.getValues().get("totalCount").toString());
                 }
+
                 apiCount.put(key, count);
             }
         }
